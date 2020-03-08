@@ -5,8 +5,11 @@ class Reminder:
     def __init__(self):
         print('intitalizaing object')
         self.reminder = tkr.Tk()
-        self.transparency = 1.0
-        self.message = 'Reminder'
+        self.transparency = 0.5
+        self.message = 'nik e gei'
+        self.time_between_reminders = 2
+        self.reminder_time_on_screen = 2
+        
         self.set_up_message()
 
         self.reminder.wm_attributes("-alpha",self.transparency)
@@ -28,9 +31,8 @@ class Reminder:
     def update(self):
         print('updating reminder')
         self.reminder.update()
-        #useless
 
-    def stop(self):
+    def destroy(self):
         print('destroying reminder')
         self.reminder.destroy()
 
@@ -46,6 +48,12 @@ class Reminder:
         self.MESSAGE.destroy()
         self.set_up_message()
 
+    def change_time_between_reminders(new_time):
+        self.time_between_reminders = new_time
+
+    def change_reminder_time_on_screen(new_time):
+        self.reminder_time_on_screen = new_time
+        
     def center(self):
         self.reminder.update_idletasks()
         width = self.reminder.winfo_width()
@@ -65,14 +73,13 @@ class Reminder:
         self.MESSAGE.config(font = ('times', 100, 'italic'))
         self.MESSAGE.pack()
 
-reminder = Reminder()
-reminder.update()
-time.sleep(2)
-reminder.change_transparency(0.5)
-reminder.change_message('nik e gei')
-reminder.update()
-time.sleep(2)
-reminder.stop()
+for i in range(10):
+    reminder = Reminder()
+    reminder.update()
+    time.sleep(reminder.reminder_time_on_screen)
+    time_off = reminder.time_between_reminders
+    reminder.destroy()
+    time.sleep(time_off)
 
 #safe for later
 #root.overrideredirect(1)
