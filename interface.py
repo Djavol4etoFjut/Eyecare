@@ -1,7 +1,11 @@
 import tkinter as tkr
 import time
+import subprocess
+import os
+import signal
 
 #WIDGET NAMES ARE DECLARED WITH CAPITAL LETTERS
+
 
 class Interface:
     def __init__(self):
@@ -11,6 +15,7 @@ class Interface:
         self.reminder_time_on_screen = 5
         self.transparency = 0.5
         self.message = 'Give you eyes some rest'
+        self.process_status = False
         self.set_up_widgets()
         self.interface.mainloop()
 
@@ -43,11 +48,25 @@ class Interface:
         self.set_up_widgets()
         self.interface.update()
         
-    
+    def on_click_process_status(self):
+        if(self.process_status == False):
+            print('Creating process')
+            self.PID = subprocess.Popen('reminderexe.exe')
+            self.process_status = True
+        elif(self.process_status == True):
+            print('Destroying process')
+            #self.PID.terminate()
+            #self.PID.kill()
+            subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=self.PID.pid))
+            self.process_status = False
+        self.destroy_widgets()
+        self.set_up_widgets()
+        self.interface.update()
+
+        
     def set_up_widgets(self):
         self.CLOSE_BUTTON = tkr.Button(text = 'close', command = self.exit_main_loop)
 
-        
         self.MESSAGE_CURRENT = tkr.Label(self.interface, text = 'current message is: ' + self.message)
         self.TIME_BETWEEN_REMINDERS_CURRENT = tkr.Label(self.interface, text = 'current time between reminders is: ' + str(self.time_between_reminders))
         self.REMINDER_TIME_ON_SCREEN_CURRENT = tkr.Label(self.interface, text = 'current time of reminder on screen is: ' + str(self.reminder_time_on_screen))
@@ -61,7 +80,10 @@ class Interface:
         self.MESSAGE_BUTTON = tkr.Button(self.interface, text='Change', command=lambda: self.on_click_message(self.MESSAGE_ENTRY.get()))
         self.TIME_BETWEEN_REMINDERS_BUTTON = tkr.Button(self.interface, text='Change', command=lambda: self.on_click_time_between_reminders(self.TIME_BETWEEN_REMINDERS_ENTRY.get()))
         self.REMINDER_TIME_ON_SCREEN_BUTTON = tkr.Button(self.interface, text='Change', command=lambda: self.on_click_reminder_time_on_screen(self.REMINDER_TIME_ON_SCREEN_ENTRY.get()))
-        self.TRANSPARENCY_BUTTON = tkr.Button(self.interface, text='Change', command=lambda: self.on_click_transparency(self.TRANSPARENCY_ENTRY.get()))    
+        self.TRANSPARENCY_BUTTON = tkr.Button(self.interface, text='Change', command=lambda: self.on_click_transparency(self.TRANSPARENCY_ENTRY.get()))
+
+        self.STATUS_CURRENT = tkr.Label(self.interface, text = 'current status of process: ' + self.process_status_to_string())
+        self.STATUS_BUTTON = tkr.Button(self.interface, text = 'ON/OFF', command = self.on_click_process_status)
     
         
         self.MESSAGE_CURRENT.grid(row=1, column=0)
@@ -79,8 +101,10 @@ class Interface:
         self.REMINDER_TIME_ON_SCREEN_BUTTON.grid(row=3, column=2)
         self.TRANSPARENCY_BUTTON.grid(row=4, column=2)
 
-        
-        self.CLOSE_BUTTON.grid(row=5,column=0)
+        self.STATUS_CURRENT.grid(row=5, column=0)
+        self.STATUS_BUTTON.grid(row=5, column=1)
+
+        self.CLOSE_BUTTON.grid(row=6,column=0)
 
     def destroy_widgets(self):
         self.CLOSE_BUTTON.grid_remove()
@@ -100,7 +124,15 @@ class Interface:
         self.REMINDER_TIME_ON_SCREEN_BUTTON.grid_remove()
         self.TRANSPARENCY_BUTTON.grid_remove()
 
+        self.STATUS_CURRENT.grid_remove()
+        self.STATUS_BUTTON.grid_remove()
 
+    def process_status_to_string(self):
+        if(self.process_status == False):
+            return 'OFF'
+        elif(self.process_status == True):
+            return 'ON'
+        
     def exit_main_loop(self):
         print('exiting main loop')
         self.interface.quit()
@@ -128,4 +160,5 @@ class Interface:
 
 interface = Interface()
 interface.destroy()
+
 
