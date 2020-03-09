@@ -1,9 +1,11 @@
 import tkinter as tkr
 import time
 
+#WIDGET NAMES ARE DECLARED WITH CAPITAL LETTERS
+
 class Reminder:
     def __init__(self):
-        print('intitalizaing object')
+        print('intitalizaing reminder object')
         self.reminder = tkr.Tk()
         self.transparency = 0.5
         self.message = 'nik e gei'
@@ -73,7 +75,7 @@ class Reminder:
         self.MESSAGE.config(font = ('times', 100, 'italic'))
         self.MESSAGE.pack()
 
-for i in range(10):
+while(True):
     reminder = Reminder()
     reminder.update()
     time.sleep(reminder.reminder_time_on_screen)
@@ -84,4 +86,3 @@ for i in range(10):
 #safe for later
 #root.overrideredirect(1)
 #root.lift()
-
