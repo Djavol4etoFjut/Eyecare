@@ -3,66 +3,56 @@ import time
 import subprocess
 import os
 import signal
+import sqlite3
 
 #WIDGET NAMES ARE DECLARED WITH CAPITAL LETTERS
-
+#a
 
 class Interface:
     def __init__(self):
         print('initializing interface object')
         self.interface = tkr.Tk()
-        self.time_between_reminders = 60*60
-        self.reminder_time_on_screen = 5
-        self.transparency = 0.5
-        self.message = 'Give you eyes some rest'
-        self.process_status = False
+        self.update_from_database()
         self.set_up_widgets()
         self.interface.mainloop()
 
 
-    def on_click_message(self, new_msg):
-        self.change_message(new_msg)
-        #zapishi v baza danni
+    def update_all(self):
+        self.write_settings_to_database()
         self.destroy_widgets()
         self.set_up_widgets()
         self.interface.update()
         
+    def on_click_message(self, new_msg):
+        self.change_message(new_msg)
+        self.update_all()
+        
     def on_click_time_between_reminders(self, new_time_between_reminders):
         self.change_time_between_reminders(int(new_time_between_reminders))
-        #zapishi v baza danni
-        self.destroy_widgets()
-        self.set_up_widgets()
-        self.interface.update()
+        self.update_all()
             
     def on_click_reminder_time_on_screen(self, new_reminder_time_on_screen):
         self.change_reminder_time_on_screen(int(new_reminder_time_on_screen))
-        #zapishi v baza danni
-        self.destroy_widgets()
-        self.set_up_widgets()
-        self.interface.update()
+        self.update_all()
             
     def on_click_transparency(self, new_transparency):
         self.change_transparency(float(new_transparency))
-        #zapishi v baza danni
-        self.destroy_widgets()
-        self.set_up_widgets()
-        self.interface.update()
+        self.update_all()
         
     def on_click_process_status(self):
         if(self.process_status == False):
             print('Creating process')
             self.PID = subprocess.Popen('reminderexe.exe')
+            self.process_id_in_string = str(self.PID.pid)
             self.process_status = True
         elif(self.process_status == True):
             print('Destroying process')
             #self.PID.terminate()
             #self.PID.kill()
-            subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=self.PID.pid))
+            subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=int(self.process_id_in_string)))
             self.process_status = False
-        self.destroy_widgets()
-        self.set_up_widgets()
-        self.interface.update()
-
+            self.process_id_in_string = 'NULL'
+        self.update_all()
         
     def set_up_widgets(self):
         self.CLOSE_BUTTON = tkr.Button(text = 'close', command = self.exit_main_loop)
@@ -154,11 +144,62 @@ class Interface:
         self.message = new_message
 
 
-    def write_settings_to_database():
-        #she se zapisva v database vsichki nastroiki v taq funkciq
-        pass
+    def update_from_database(self):
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        
+        cur.execute("SELECT message FROM settings")
+        temp = cur.fetchall()
+        self.message = temp[0][0]
+
+        cur.execute("SELECT transparency FROM settings")
+        temp = cur.fetchall()
+        self.transparency = temp[0][0]
+
+        cur.execute("SELECT time_between_reminders FROM settings")
+        temp = cur.fetchall()
+        self.time_between_reminders = temp[0][0]
+
+        cur.execute("SELECT time_of_reminder_on_screen FROM settings")
+        temp = cur.fetchall()
+        self.reminder_time_on_screen = temp[0][0]
+
+        cur.execute("SELECT process_status FROM settings")
+        temp = cur.fetchall()
+        if(temp[0][0] == 1):
+            self.process_status = True
+        else:
+            self.process_status = False
+
+        cur.execute("SELECT PID_STR FROM settings")
+        temp = cur.fetchall()
+        self.process_id_in_string = temp[0][0]
+        
+    def write_settings_to_database(self):
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+
+        str1 = ''' UPDATE settings 
+                    SET message = ?,
+                    transparency = ?,
+                    time_between_reminders = ?,
+                    time_of_reminder_on_screen = ?,
+                    process_status = ?,
+                    PID_STR = ?'''
+        if(self.process_status == False):
+            help1 = 0
+        elif(self.process_status == True):
+            help1 = 1
+        help2 = (self.message, self.transparency,
+                 self.time_between_reminders, self.reminder_time_on_screen,
+                 help1, self.process_id_in_string)
+        cur.execute(str1, help2)
+        
+        conn.commit()
+        
+    
 
 interface = Interface()
 interface.destroy()
-
+interface.update_from_database()
 
