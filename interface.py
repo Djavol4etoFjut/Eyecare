@@ -10,7 +10,6 @@ import sqlite3
 
 class Interface:
     def __init__(self):
-        print('initializing interface object')
         self.interface = tkr.Tk()
         self.update_from_database()
         self.set_up_widgets()
@@ -41,12 +40,10 @@ class Interface:
         
     def on_click_process_status(self):
         if(self.process_status == False):
-            print('Creating process')
             self.PID = subprocess.Popen('reminderexe.exe')
             self.process_id_in_string = str(self.PID.pid)
             self.process_status = True
         elif(self.process_status == True):
-            print('Destroying process')
             #self.PID.terminate()
             #self.PID.kill()
             subprocess.Popen("TASKKILL /F /PID {pid} /T".format(pid=int(self.process_id_in_string)))
@@ -124,11 +121,9 @@ class Interface:
             return 'ON'
         
     def exit_main_loop(self):
-        print('exiting main loop')
         self.interface.quit()
 
     def destroy(self):
-        print('destroying interface object')
         self.interface.destroy()
 
     def change_transparency(self, new_transparency):
@@ -202,4 +197,3 @@ class Interface:
 interface = Interface()
 interface.destroy()
 interface.update_from_database()
-

@@ -31,12 +31,10 @@ class Reminder:
 
 
     def change_transparency(self, new_transparency):
-        print('changing transparency to',new_transparency)
         self.transparency = new_transparency
         self.reminder.wm_attributes("-alpha",self.transparency)
 
     def change_message(self, msg):
-        print('çhanging message')
         self.message = msg
         self.MESSAGE.destroy()
         self.set_up_message()
@@ -105,3 +103,4 @@ while(True):
 #safe for later
 #root.overrideredirect(1)
 #root.lift()
+
